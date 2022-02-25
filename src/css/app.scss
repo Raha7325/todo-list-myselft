@@ -1,0 +1,16 @@
+// app global css in SCSS form
+.pink-borders.q-field--outlined.q-field--highlighted .q-field__control:after{
+  border-color: $pink !important;
+}
+.border-pink{
+  border-radius: 11px;
+  border-left: 8px solid deeppink;
+}
+.border-green{
+  border-radius: 11px;
+  border-left: 8px solid #469a9a;
+}
+.border-right{
+  border-radius: 11px;
+  border-right: 8px solid ;
+}
