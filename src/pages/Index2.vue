@@ -35,7 +35,8 @@
         @click="updateRouterQuery('done')"
         label="done"
         checked-icon="check"
-        unchecked-icon="close"/>
+        unchecked-icon="close"/> {{filters.category}}
+      <q-select v-model="filters.category" emit-value map-options :options="options" label="category"/>
     </div>
     <div class="row full-width justify-center q-pa-lg">
       <div class="col-sm-6 col-lg-4">
@@ -136,6 +137,11 @@
           checked-icon="star"
           unchecked-icon="star_border"
         />
+        <div class="q-gutter-sm">
+          <q-radio keep-color v-model="edit.category" val="work" label="work" color="orange" />
+          <q-radio keep-color v-model="edit.category" val="private" label="private" color="red" />
+          <q-radio keep-color v-model="edit.category" val="public" label="public" color="cyan" />
+        </div>
         <div class="col-12">
           <span class="q-ml-sm">Edit</span>
         </div>
@@ -153,7 +159,7 @@
 </template>
 
 <script>
-import { ref , computed } from 'vue'
+import { ref , computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar , Notify } from 'quasar'
 
@@ -162,18 +168,40 @@ export default {
     const $q = useQuasar()
     const router = useRouter()
     const route = useRoute()
-    const edit = ref({ content:'', done:false, favorite:false});
+    const edit = ref({ content:'', done:false, favorite:false, category:''});
     const add = ref({ content:'', category: '', done:false, favorite:false});
     const filterText = ref('');
     const todoListItems = ref([]);
-    console.log(todoListItems)
     const openDialogForAddItem =ref(false)
     const confirmDeleteDialog = ref(false);
     const editBoxForDialog = ref(false)
     const currentItem = ref({index: '', content: ''})
-    const filters = ref({favorite: null, done:null})
+    const filters = ref({favorite: null, done:null, category:null})
+    const options =ref([
+      {
+        label: 'select a category',
+        value: null,
+      },
+      {
+        label: 'work',
+        value: 'work'
+      },
+      {
+        label: 'private',
+        value: 'private'
+      },
+      {
+        label: 'public',
+        value: 'public'
+      },
+    ])
     for(let key in route.query){
-      filters.value[key] = route.query[key] === "true"
+      if(key === 'category'){
+        filters.value[key] = route.query[key]
+      }
+      else{
+        filters.value[key] = route.query[key] === "true"
+      }
     }
 // a computed ref
     const computedFilteredItems = computed(() => {
@@ -186,6 +214,15 @@ export default {
     // watch(todoListItems, () => {
     //   filterItems()
     // },{ deep: true })
+
+    // instead, use a getter:
+    watch(
+      () => filters.value.category,
+      () => {
+        console.log("waaaaaaaatch")
+        updateRouterQuery('category');
+      }
+    )
 
     const filteredItems = (allItems) => {
       return (allItems.filter(item => item.content.includes(filterText.value)))
@@ -251,6 +288,7 @@ export default {
       todoListItems.value[itemIndex].content = edit.value.content;
       todoListItems.value[itemIndex].done = edit.value.done;
       todoListItems.value[itemIndex].favorite = edit.value.favorite;
+      todoListItems.value[itemIndex].category = edit.value.category;
       localStorage.setItem('items', JSON.stringify(todoListItems.value))
       editBoxForDialog.value =false
       $q.notify({
@@ -269,10 +307,12 @@ export default {
       currentItem.value.content = todoListItems.value[index].content
       currentItem.value.done = todoListItems.value[index].done
       currentItem.value.favorite = todoListItems.value[index].favorite
+      currentItem.value.category = todoListItems.value[index].category
       currentItem.value.index = index
       edit.value.content = currentItem.value.content
       edit.value.done = currentItem.value.done
       edit.value.favorite = currentItem.value.favorite
+      edit.value.category = currentItem.value.category
     }
     const updateRouterQuery = (name) => {
       const value = filters.value[name] === null ? undefined : filters.value[name]
@@ -290,6 +330,7 @@ export default {
       editBoxForDialog,
       currentItem,
       filters,
+      options,
       addToList,
       openAddDialog,
       deleteItem,

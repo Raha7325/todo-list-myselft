@@ -4,8 +4,9 @@
     <q-toggle
       v-model="active"
       @click="toggleTheme"
-      color="black"
-      class="q-ma-lg" />
+      :color="$q.dark.isActive ? 'cyan' : 'pink'"
+      keep-color
+      class="q-ma-lg" />{{active}}
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -26,7 +27,12 @@ export default defineComponent({
     let theme = JSON.parse(localStorage.getItem('dark'))
     if (theme === true){
       $q.dark.set(true)
+      active.value = !theme;
     }
+    if(theme === false){
+      active.value = !theme;
+    }
+
     const toggleTheme = () => {
       $q.dark.toggle()
       localStorage.setItem('dark' , JSON.stringify($q.dark.isActive) )
